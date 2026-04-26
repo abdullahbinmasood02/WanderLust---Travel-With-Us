@@ -459,8 +459,7 @@ nav {
 #cart-total {
   font-weight: 800;
   font-size: 1.05rem;
-  color: var(--coral);
-  margin-top: 0.75rem;
+  color: var(--coral);s
   text-align: right;
 }
 
@@ -504,11 +503,6 @@ nav {
 }
 #toast .t-icon {
   margin-right: 0.5rem;
-}
-
-table {
-  border-collapse: separate;
-  border-spacing: 27px;
 }
 
 @media (max-width: 900px) {

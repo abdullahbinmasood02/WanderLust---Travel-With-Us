@@ -241,7 +241,7 @@ function populateTripDropdown(trips) {
 populateTripDropdown(trips);
 
 // CALCULATE & DISPLAY PRICE SUMMARY ───────────────────
-
+let total;
 const inputTravellersEl = document.querySelector("#input-travelers");
 const priceSummaryEl = document.querySelector("#price-summary");
 
@@ -258,28 +258,31 @@ function displayPriceSummary(trips) {
   if (selectedTrip) {
     const subTotal = selectedTrip.price * travellersQuantity;
     const tax = subTotal * 0.08;
-    const total = subTotal + tax;
+    total = subTotal + tax;
 
     const html = `
-    <table>
+    <table class="price-summary">
 
-      <tr>
-        <th>Base Price Per Person</th>
-        <th>Travellers</th>
-        <th>Subtotal</th>
-        <th>Tax (8%)</th>
-        <th>Total</th>
+      <tr class="price-row">
+        <td>Base Price Per Person: ${selectedTrip.price.toFixed(2)}</td>
       </tr>
+       <tr class="price-row">
+          <td>Travellers: ${travellersQuantity}</td>
+        </tr>
+         <tr class="price-row">
+          <td>Subtotal: ${subTotal.toFixed(2)}</td>
+        </tr>
+         <tr class="price-row">
+           <td>Tax (8%): ${tax.toFixed(2)}</td>
+        </tr>
+        <tr class="price-row">
+          <td>Total: ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(total)}</td>
+        </tr>
 
-      <tr>
-        <td>${selectedTrip.price.toFixed(2)}</td>
-        <td>${travellersQuantity}</td>
-        <td>${subTotal.toFixed(2)}</td>
-        <td>${tax.toFixed(2)}</td>
-        <td>${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(total)}</td>
+     
        
 
-      </tr>
+    
 
     </table>
     
@@ -313,14 +316,19 @@ btnBookEl.addEventListener("click", function () {
   } else {
     const trip = trips.find((trip) => trip.id === tripId);
 
-    cart.push(trip);
+    cart.push({
+      name: trip.name,
+      travellers: travellers,
+      price: total.toFixed(2),
+    });
+    // console.log(cart);
 
     bookingMsgEl.textContent = "Success! Booking Confirmed";
 
     bookingMsgEl.classList.remove("error");
     bookingMsgEl.classList.add("success");
     bookingMsgEl.classList.add("show");
-
+    renderCart();
     setTimeout(() => {
       bookingMsgEl.classList.remove("show");
     }, 3000);
@@ -338,9 +346,32 @@ btnBookEl.addEventListener("click", function () {
 //   Show total in #cart-total using Intl.NumberFormat
 //   Add event listeners to remove buttons (use data-index to splice from cart)
 // YOUR CODE:
+const cartItemsEl = document.querySelector("#cart-items");
 function renderCart() {
-  // YOUR CODE HERE
+  cartItemsEl.textContent = "";
+
+  cart.forEach((item, index) => {
+    console.log(item);
+    const html = `
+    <div class="cart-item">
+      <div>${item.name}</div>
+      <div>${item.travellers} </div>
+      <div id="cart-total">${Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(total)}</div>
+      <button class ="cart-remove" data-index=${index}>remove</button>
+    
+    </div>
+    `;
+    cartItemsEl.insertAdjacentHTML("beforeend", html);
+  });
 }
+
+document.addEventListener("click", function (e) {
+  if (e.target.dataset.index) {
+    const index = e.target.dataset.index;
+    cart.splice(index, 1);
+    renderCart();
+  }
+});
 
 // ── GOAL 9: RENDER STATS PANEL ───────────────────────────────────
 // Concept: Math.min/max + reduce + filter + [...new Set()] + Intl.NumberFormat
