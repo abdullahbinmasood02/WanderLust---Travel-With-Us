@@ -204,12 +204,66 @@ function displayNextDepartingTripClock() {
   }, 1000);
 }
 
+function getStars(rating) {
+  rating = Math.floor(rating);
+  return "★".repeat(rating) + "☆".repeat(5 - rating);
+}
+
 displayNextDepartingTripClock();
 // RENDER TRIP CARDS ────────────────────────────────────
+const tripsGridEl = document.querySelector("#trips-grid");
 
-function renderTrips() {
-  // YOUR CODE HERE
+function renderTrips(displayedTrips) {
+  tripsGridEl.innerHTML = "";
+
+  displayedTrips.forEach((trip, index) => {
+    let cardClasses = `trip-card ${index % 2 !== 0 ? "stripe" : null} ${trip.available ? null : "unavailable"}`;
+    const tripCard = `
+  
+  <div class = ${cardClasses}>
+
+    <div class ="card-img ${trip.continent.toLowerCase()}">
+      <text class="card-country">${trip.country}</text>
+    </div>
+
+    <div class = "card-body"
+
+      <div class = "card-name">
+        ${trip.name}
+      </div>
+
+      <div class = "card-meta">
+
+        <text>Duration: ${trip.duration}</text>
+        <text>Seats left: ${trip.seats}</text>
+
+      </div>
+
+      <div class = "card-price">
+
+        ${trip.price} <small>/person</small>
+
+      </div>
+
+      <div class = "card-footer"
+
+        <div  class = "rating"> ${getStars(trip.rating)}  </div>
+        <button class = "btn-book"> Book </button>
+
+      </div>
+
+    </div>
+
+  
+
+  </div>
+  `;
+
+    tripsGridEl.insertAdjacentHTML("beforeend", tripCard);
+  });
 }
+
+renderTrips(displayedTrips);
 
 //SET TODAY'S DATE IN BOOKING FORM ────────────────────
 
@@ -335,17 +389,8 @@ btnBookEl.addEventListener("click", function () {
   }
 });
 
-// ── GOAL 8: RENDER CART ─────────────────────────────────────────
-// Concept: forEach + insertAdjacentHTML + reduce + Intl.NumberFormat
-// Function renderCart():
-//   Clear #cart-items
-//   If cart is empty, show "No trips added yet."
-//   For each item in cart, insertAdjacentHTML a row showing:
-//     trip name, travelers, price, and a remove button (data-index attribute)
-//   Calculate total with: cart.reduce((sum, item) => sum + item.total, 0)
-//   Show total in #cart-total using Intl.NumberFormat
-//   Add event listeners to remove buttons (use data-index to splice from cart)
-// YOUR CODE:
+// RENDER CART ─────────────────────────────────────────
+
 const cartItemsEl = document.querySelector("#cart-items");
 function renderCart() {
   cartItemsEl.textContent = "";
@@ -373,33 +418,71 @@ document.addEventListener("click", function (e) {
   }
 });
 
-// ── GOAL 9: RENDER STATS PANEL ───────────────────────────────────
-// Concept: Math.min/max + reduce + filter + [...new Set()] + Intl.NumberFormat
-// Function renderStats():
-//   Cheapest:  Math.min(...trips.map(t => t.price))
-//   Expensive: Math.max(...trips.map(t => t.price))
-//   Average:   trips.reduce((s,t) => s + t.price, 0) / trips.length  → toFixed(2)
-//   Available: trips.filter(t => t.available).length
-//   Countries: [...new Set(trips.map(t => t.country))].length
-//   Format prices with Intl.NumberFormat and update the stat elements.
-// YOUR CODE:
-function renderStats() {
-  // YOUR CODE HERE
+// RENDER STATS PANEL ──────────────────────────────────
+
+const statCheapEl = document.querySelector("#stat-cheap");
+const statExpensiveEl = document.querySelector("#stat-expensive");
+const statAvgEl = document.querySelector("#stat-avg");
+const statAvailableEl = document.querySelector("#stat-available");
+const statCountriesEl = document.querySelector("#stat-countries");
+
+function getCurrencyOptions() {
+  return {
+    style: "currency",
+    currency: "USD",
+  };
+}
+function renderStats(trips) {
+  let cheapestTrip = trips.map((trip) => trip.price);
+  cheapestTrip = Intl.NumberFormat("en-US", getCurrencyOptions()).format(
+    Math.min(...cheapestTrip),
+  );
+  cheapestTrip;
+  let expensiveTrip = Math.max(...trips.map((trip) => trip.price));
+  expensiveTrip = Intl.NumberFormat("en-US", getCurrencyOptions()).format(
+    expensiveTrip,
+  );
+  let averagePrice = (
+    trips.reduce((acc, trip) => acc + trip.price, 0) / trips.length
+  ).toFixed(2);
+  averagePrice = Intl.NumberFormat("en-US", getCurrencyOptions()).format(
+    averagePrice,
+  );
+  const availableTrips = trips
+    .filter((trip) => trip.available)
+    .map((trip) => trip.name);
+  const countries = [...new Set(trips.map((trip) => trip.country))];
+
+  statAvailableEl.textContent = availableTrips.length;
+  statAvgEl.textContent = averagePrice;
+  statCheapEl.textContent = cheapestTrip;
+  statExpensiveEl.textContent = expensiveTrip;
+  statCountriesEl.textContent = countries.length;
 }
 
-// ── GOAL 10: SEARCH FILTER ───────────────────────────────────────
-// Concept: querySelector + String methods (.toLowerCase, .includes) + filter + renderTrips
-// Listen to 'input' event on #search-input.
-// On each keystroke:
-//   const query = e.target.value.toLowerCase().trim()
-//   displayedTrips = trips.filter(t =>
-//     t.name.toLowerCase().includes(query) ||
-//     t.country.toLowerCase().includes(query) ||
-//     t.continent.toLowerCase().includes(query)
-//   )
-//   renderTrips()
-// YOUR CODE:
+renderStats(displayedTrips);
 
+//  SEARCH FILTER ───────────────────────────────────────
+
+const searchInputEl = document.querySelector("#search-input");
+
+function displayFilteredTrips(e) {
+  const filterString = e.target.value.toLowerCase().trim();
+
+  const filteredTrips = trips.filter((trip) => {
+    return (
+      trip.name.toLowerCase().includes(filterString) ||
+      trip.country.toLowerCase().includes(filterString) ||
+      trip.continent.toLowerCase().includes(filterString)
+    );
+  });
+
+  displayedTrips = filteredTrips;
+
+  renderTrips(displayedTrips);
+}
+
+searchInputEl.addEventListener("input", displayFilteredTrips);
 // ── GOAL 11: CONTINENT FILTER BUTTONS ───────────────────────────
 // Concept: querySelectorAll + forEach + filter + classList + bind
 // Select all .filter-btn with querySelectorAll.
@@ -570,8 +653,3 @@ function renderStats() {
 // console.log(formatUSD(1299.99))   // $1,299.99
 // console.log(formatEUR(1299.99))   // 1.299,99 €
 // YOUR CODE:
-
-// ── INITIAL CALLS (already wired — do not change) ────────────────
-renderTrips();
-renderCart();
-renderStats();

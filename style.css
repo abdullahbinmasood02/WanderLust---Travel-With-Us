@@ -282,10 +282,12 @@ nav {
   font-size: 0.75rem;
   color: var(--muted);
   margin-bottom: 0.75rem;
+  margin-left: 0.75rem;
 }
 .card-price {
   font-size: 1.2rem;
   font-weight: 800;
+  margin-left: 0.75rem;
   color: var(--coral);
 }
 .card-price small {
@@ -297,12 +299,13 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.75rem;
+  margin-left: 0.75rem;
 }
 .rating {
   font-size: 0.78rem;
   color: var(--gold);
   font-weight: 600;
+  
 }
 .btn-book {
   background: var(--dark);
@@ -315,6 +318,9 @@ nav {
   cursor: pointer;
   transition: background 0.2s;
   font-family: "Inter", sans-serif;
+  margin-left: 0.75rem;
+  margin-bottom: 0.75rem;
+  margin-top:1.75rem;
 }
 .btn-book:hover {
   background: var(--coral);
@@ -512,4 +518,7 @@ nav {
   .sidebar {
     order: -1;
   }
+}
+.hero::before {
+  pointer-events: none;
 }
