@@ -211,6 +211,7 @@ function getStars(rating) {
 
 displayNextDepartingTripClock();
 // RENDER TRIP CARDS ────────────────────────────────────
+
 const tripsGridEl = document.querySelector("#trips-grid");
 
 function renderTrips(displayedTrips) {
@@ -218,7 +219,15 @@ function renderTrips(displayedTrips) {
 
   displayedTrips.forEach((trip, index) => {
     let cardClasses = `trip-card ${index % 2 !== 0 ? "stripe" : null} ${trip.available ? null : "unavailable"}`;
+    let departureDate = trip.departure;
+    departureDate = Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(departureDate);
+
     const tripCard = `
+  
   
   <div class = ${cardClasses}>
 
@@ -234,8 +243,10 @@ function renderTrips(displayedTrips) {
 
       <div class = "card-meta">
 
-        <text>Duration: ${trip.duration}</text>
-        <text>Seats left: ${trip.seats}</text>
+        <span>${trip.duration} days</span>
+        <span>${trip.seats} seats left</span>
+        <span>Departing on ${departureDate}</span>
+        
 
       </div>
 
@@ -247,7 +258,7 @@ function renderTrips(displayedTrips) {
 
       <div class = "card-footer"
 
-        <div  class = "rating"> ${getStars(trip.rating)}  </div>
+        <div  class = "rating"> ${trip.rating} ${getStars(trip.rating)}  </div>
         <button class = "btn-book"> Book </button>
 
       </div>
@@ -483,37 +494,57 @@ function displayFilteredTrips(e) {
 }
 
 searchInputEl.addEventListener("input", displayFilteredTrips);
-// ── GOAL 11: CONTINENT FILTER BUTTONS ───────────────────────────
-// Concept: querySelectorAll + forEach + filter + classList + bind
-// Select all .filter-btn with querySelectorAll.
-// On each button click:
-//   - Remove 'active' class from all buttons (forEach)
-//   - Add 'active' to clicked button
-//   - If data-filter === 'all': displayedTrips = [...trips]
-//   - Else: displayedTrips = trips.filter(t => t.continent === filter)
-//   - Call renderTrips()
-// YOUR CODE:
+// CONTINENT FILTER BUTTONS ───────────────────────────
 
-// ── GOAL 12: SORT SELECT ─────────────────────────────────────────
-// Concept: querySelector + toSorted (non-mutating) + switch or object map
-// Listen to 'change' on #sort-select.
-// Based on value, use .toSorted() to sort displayedTrips:
-//   'price-asc':  (a,b) => a.price - b.price
-//   'price-desc': (a,b) => b.price - a.price
-//   'rating':     (a,b) => b.rating - a.rating
-//   'duration':   (a,b) => a.duration - b.duration
-//   default: displayedTrips = [...trips]
-// Call renderTrips() after sorting.
-// YOUR CODE:
+filterBtnsList = document.querySelectorAll(".filter-btn");
 
-// ── GOAL 13: FORMAT DEPARTURE DATE ON CARD ───────────────────────
-// Concept: Intl.DateTimeFormat + new Date()
-// Inside renderTrips(), format each trip's departure date:
-//   new Intl.DateTimeFormat('en-US', { month:'short', day:'numeric', year:'numeric' })
-//     .format(trip.departure)
-// Show this in the card meta section.
-// (Requires you to update your renderTrips() from Goal 3)
-// YOUR CODE: (edit renderTrips above)
+function removeActiveClasses(filterBtns) {
+  filterBtns.forEach((btn) => btn.classList.remove("active"));
+}
+
+filterBtnsList.forEach((btn) => {
+  btn.addEventListener("click", function (e) {
+    removeActiveClasses(filterBtnsList); //remove active class from all filter buttons
+    e.target.classList.add("active"); // add active class only to currently clicked filter button
+    const continent = e.target.dataset.filter;
+
+    if (continent === "all") {
+      // if clicked on "All" display all trips
+      displayedTrips = [...trips];
+    } else {
+      // else display only the trips having the that continent present in button filter e.g Asia, Africa, etc.
+      const filteredTrips = trips.filter(
+        (trip) => trip.continent === continent,
+      );
+      displayedTrips = [...filteredTrips];
+    }
+
+    renderTrips(displayedTrips);
+  });
+});
+
+// SORT SELECT ─────────────────────────────────────────
+
+const sortTripsBtn = document.querySelector("#sort-select");
+
+function sort(sortCriteria) {
+  let sortedTrips;
+
+  if (sortCriteria === "price-asc") {
+    sortedTrips = trips.toSorted((a, b) => a.price - b.price);
+  } else if (sortCriteria === "price-desc") {
+    sortedTrips = trips.toSorted((a, b) => b.price - a.price);
+  } else if (sortCriteria === "rating") {
+    sortedTrips = trips.toSorted((a, b) => b.rating - a.rating);
+  } else if (sortCriteria === "duration") {
+    sortedTrips = trips.toSorted((a, b) => a.duration - b.duration);
+  }
+  displayedTrips = [...sortedTrips];
+
+  renderTrips(displayedTrips);
+}
+
+sortTripsBtn.addEventListener("change", (e) => sort(e.target.value));
 
 // ── GOAL 14: DESTRUCTURE TRIP IN BOOKING HANDLER ─────────────────
 // Concept: Object destructuring + default values
