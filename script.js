@@ -380,15 +380,18 @@ btnBookEl.addEventListener("click", function () {
     bookingMsgEl.classList.add("error", "show");
   } else {
     const trip = trips.find((trip) => trip.id === tripId);
+    const { name, price, duration, hotel: { name: hotelName } = {} } = trip;
 
     cart.push({
-      name: trip.name,
+      name,
       travellers: travellers,
       price: total.toFixed(2),
+      duration,
+      hotelName,
     });
     // console.log(cart);
 
-    bookingMsgEl.textContent = "Success! Booking Confirmed";
+    bookingMsgEl.textContent = `Success! Booking Confirmed ${hotelName ? `for ${hotelName}` : null}`;
 
     bookingMsgEl.classList.remove("error");
     bookingMsgEl.classList.add("success");
@@ -546,30 +549,36 @@ function sort(sortCriteria) {
 
 sortTripsBtn.addEventListener("change", (e) => sort(e.target.value));
 
-// ── GOAL 14: DESTRUCTURE TRIP IN BOOKING HANDLER ─────────────────
-// Concept: Object destructuring + default values
-// Inside your booking click handler (Goal 7), when you have the trip object,
-// destructure it: const { name, price, duration, hotel: { name: hotelName } = {} } = trip
-// Use hotelName in the success message if available.
-// YOUR CODE: (edit your Goal 7 handler above)
+//  GROUP TRIPS BY CONTINENT ────────────────────────────
 
-// ── GOAL 15: GROUP TRIPS BY CONTINENT ────────────────────────────
-// Concept: Object.groupBy
-// const grouped = Object.groupBy(trips, t => t.continent)
-// Log grouped to console. Each key is a continent, value is array of trips.
-// Then log how many trips are in each continent using Object.entries(grouped).
-// YOUR CODE:
+const groupedByContinent = Object.groupBy(trips, (t) => t.continent);
+console.log(groupedByContinent);
 
-// ── GOAL 16: FIND CHEAPEST AVAILABLE TRIP ────────────────────────
-// Concept: filter + toSorted + destructuring + optional chaining ?.
-// const cheapest = trips
-//   .filter(t => t.available)
-//   .toSorted((a,b) => a.price - b.price)
-//   .at(0)
-// const { name, price, hotel } = cheapest
-// console.log(`Cheapest: ${name} at $${price}. Hotel: ${hotel?.name ?? 'N/A'}`)
-// YOUR CODE:
+for (const item of Object.entries(groupedByContinent)) {
+  console.log(
+    `number of trips for continent ${item[0].toUpperCase()} are ${item[1].length}`,
+  );
+}
 
+// FIND CHEAPEST AVAILABLE TRIP ────────────────────────
+
+function calcCheapestTrip(trips) {
+  const availableTrips = trips.filter((trip) => trip.available);
+  const sortedByPriceAsc = trips.toSorted((a, b) => a.price - b.price);
+  const cheapestTrip = trips.at(0);
+
+  let { name, price, hotel: { name: hotelName } = {} } = cheapestTrip;
+  price = price.toFixed(2);
+  Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+    price,
+  );
+
+  console.log(
+    `cheapest trip available is ${name}, for ${price}${hotelName ? ` with hotel ${hotelName}` : null}`,
+  );
+}
+
+calcCheapestTrip(trips);
 // ── GOAL 17: GET UNIQUE SEASONS ──────────────────────────────────
 // Concept: flatMap + [...new Set()]
 // All trips have a 'season' array. Flatten them all and get unique values.
