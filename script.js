@@ -579,12 +579,15 @@ function calcCheapestTrip(trips) {
 }
 
 calcCheapestTrip(trips);
-// ── GOAL 17: GET UNIQUE SEASONS ──────────────────────────────────
-// Concept: flatMap + [...new Set()]
-// All trips have a 'season' array. Flatten them all and get unique values.
-// const uniqueSeasons = [...new Set(trips.flatMap(t => t.season))]
-// console.log(uniqueSeasons)
-// YOUR CODE:
+//  GET UNIQUE SEASONS ──────────────────────────────────
+function getUniqueSeasons(trips) {
+  let seasons = new Set(trips.flatMap((trip) => trip.season));
+  seasons = [...seasons];
+  return seasons;
+}
+
+const seasons = getUniqueSeasons(trips);
+console.log(seasons);
 
 // ── GOAL 18: TRIPS AVAILABLE IN BOTH SUMMER AND WINTER ───────────
 // Concept: Set.intersection (or filter + every)
@@ -593,6 +596,14 @@ calcCheapestTrip(trips);
 // OR use Set intersection on the season arrays.
 // console.log(both.map(t => t.name))
 // YOUR CODE:
+function getSummerWinterTrips(trips) {
+  const selected = trips.filter(
+    (trip) => trip.season.includes("summer") && trip.season.includes("winter"),
+  );
+  return selected;
+}
+
+console.log(getSummerWinterTrips(trips));
 
 // ── GOAL 19: BUILD A MAP OF tripId → trip ────────────────────────
 // Concept: Map + forEach (or new Map with Array.from)
