@@ -589,13 +589,8 @@ function getUniqueSeasons(trips) {
 const seasons = getUniqueSeasons(trips);
 console.log(seasons);
 
-// ── GOAL 18: TRIPS AVAILABLE IN BOTH SUMMER AND WINTER ───────────
-// Concept: Set.intersection (or filter + every)
-// Find trips whose season array includes BOTH 'summer' and 'winter'.
-// const both = trips.filter(t => t.season.includes('summer') && t.season.includes('winter'))
-// OR use Set intersection on the season arrays.
-// console.log(both.map(t => t.name))
-// YOUR CODE:
+// TRIPS AVAILABLE IN BOTH SUMMER AND WINTER ───────────
+
 function getSummerWinterTrips(trips) {
   const selected = trips.filter(
     (trip) => trip.season.includes("summer") && trip.season.includes("winter"),
@@ -605,102 +600,103 @@ function getSummerWinterTrips(trips) {
 
 console.log(getSummerWinterTrips(trips));
 
-// ── GOAL 19: BUILD A MAP OF tripId → trip ────────────────────────
-// Concept: Map + forEach (or new Map with Array.from)
-// const tripMap = new Map()
-// trips.forEach(t => tripMap.set(t.id, t))
-// console.log(tripMap.get(1))   // should log the Bali trip
-// console.log(tripMap.size)
-// YOUR CODE:
+// A MAP OF tripId → trip ────────────────────────
 
-// ── GOAL 20: FORMAT LARGE BOOKING ID WITH BigInt ─────────────────
-// Concept: BigInt + numeric separators
-// Imagine booking IDs can be astronomically large.
-// const bookingId = 9_007_199_254_740_992n  // BigInt literal
-// const nextId = bookingId + 1n
-// console.log(`Booking ID: ${nextId.toString()}`)
-// Note: you cannot mix BigInt with regular numbers.
-// YOUR CODE:
+function getTripMap(trips) {
+  tripMap = new Map();
+  ids = trips.map((trip) => trip.id);
 
-// ── GOAL 21: DAYS SINCE EACH TRIP WAS ADDED ──────────────────────
-// Concept: Date operations + Math.round + Intl.RelativeTimeFormat
-// Pretend each trip's joinDate is its departure. Calculate days until/since:
-// trips.forEach(t => {
-//   const diffMs = t.departure - new Date()
-//   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
-//   const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
-//   console.log(t.name + ': ' + rtf.format(diffDays, 'day'))
-// })
-// YOUR CODE:
+  ids.forEach((id, index) => {
+    tripMap.set(ids, trips[index]);
+  });
 
-// ── GOAL 22: PRICE CHECK — isNaN / isFinite / Number() ──────────
-// Concept: Number(), isNaN(), isFinite(), parseInt()
-// Test these inputs from a fake "user" submission:
-// const inputs = ['1299', '   42  ', 'abc', '', null, '3.5kg', '2500.99']
-// inputs.forEach(v => {
-//   const n = Number(v)
-//   console.log(`"${v}" → Number: ${n} | isNaN: ${isNaN(n)} | isFinite: ${isFinite(n)}`)
-// })
-// YOUR CODE:
+  console.log(tripMap.size);
+  console.log(tripMap);
+  return tripMap;
+}
 
-// ── GOAL 23: ROUND PRICES DIFFERENT WAYS ─────────────────────────
-// Concept: Math.round, Math.floor, Math.ceil, Math.trunc, toFixed
-// const price = 1_299.567
-// console.log(Math.round(price))   // 1300
-// console.log(Math.floor(price))   // 1299
-// console.log Math.ceil(price))    // 1300
-// console.log(Math.trunc(price))   // 1299
-// console.log(price.toFixed(2))    // "1299.57"
-// YOUR CODE:
+getTripMap(trips);
 
-// ── GOAL 24: SPREAD + REST ────────────────────────────────────────
-// Concept: spread operator + rest parameters
-// Write: function bookMultiple(mainTrip, ...extras) { ... }
-// Inside, use spread to build a full list: const all = [mainTrip, ...extras]
-// Log: `Booking ${all.length} trips: ${all.map(t=>t.name).join(', ')}`
-// Call it: bookMultiple(trips[0], trips[1], trips[2])
-// YOUR CODE:
+// DAYS SINCE EACH TRIP WAS ADDED ──────────────────────
 
-// ── GOAL 25: SHORT CIRCUIT & NULLISH COALESCING ──────────────────
-// Concept: ||, &&, ??, ??=, ||=
-// trips.forEach(t => {
-//   const desc = t.description ?? 'No description available.'   // ?? for null
-//   const hotelName = t.hotel?.name ?? 'No hotel info'          // ?. and ??
-//   const seats = t.seats || 'Sold out'                         // || for falsy
-//   t.description ??= 'Auto-filled description'                 // ??= assignment
-//   console.log(`${t.name}: ${desc} | Hotel: ${hotelName} | Seats: ${seats}`)
-// })
-// YOUR CODE:
+function getDaysTillDeparture(trips) {
+  trips.forEach((trip) => {
+    let difference = trip.departure - Date.now();
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    const daysLeft = rtf.format(
+      Math.round(difference / (1000 * 60 * 60 * 24)),
+      "day",
+    );
+    console.log(` ${trip.name} is ${daysLeft}`);
+  });
+}
+
+getDaysTillDeparture(trips);
+
+//  PRINT TRIPS ──────────────────
+
+function printTrips(trips) {
+  trips.forEach((trip) => {
+    console.log(`Trip Name: ${trip.name}`);
+    console.log(
+      `Description ${trip.description ?? "No Description Available"}`,
+    );
+    console.log(`Hotel Name: ${trip.hotel?.name ?? "No hotel info available"}`);
+    console.log(`Seats availability: ${trip.seats || "No seats available"}`);
+
+    console.log(`\n\n\n------------------------------\n\n\n`);
+  });
+}
+
+printTrips(trips);
 
 // ── GOAL 26: OBJECT.ENTRIES — FORMAT TRIP DETAILS ────────────────
-// Concept: Object.entries + map + join + for-of
-// Pick trips[0] and format all its properties as "key: value" strings.
-// const details = Object.entries(trips[0])
-//   .map(([key, val]) => `${key}: ${JSON.stringify(val)}`)
-// console.log(details.join('\n'))
-// YOUR CODE:
+function printTripDetails(trip) {
+  tripArray = Object.entries(trip);
+  tripStrings = tripArray.map((pair) => {
+    const [key, value] = pair;
+    return `${key}: ${JSON.stringify(value)}`;
+  });
+  tripStrings.unshift(`-------------------`);
+  tripStrings.push("-------------------");
+  const details = tripStrings.join(`\n`);
+  console.log(details);
+}
 
-// ── GOAL 27: ARRAY.FROM — COUNT RENDERED CARDS ───────────────────
-// Concept: Array.from + querySelectorAll
-// After renderTrips() runs, count how many cards are in the DOM.
-// const cards = Array.from(document.querySelectorAll('.trip-card'))
-// console.log('Cards in DOM:', cards.length)
-// Also: use Array.from to create an array of prices from 500 to 3500 in steps of 250
-// const priceSteps = Array.from({ length: 13 }, (_, i) => 500 + i * 250)
-// console.log(priceSteps)
-// YOUR CODE:
+printTripDetails(trips[0]);
 
-// ── GOAL 28: BIND — PRICE FORMATTER ──────────────────────────────
-// Concept: bind + this
-// const formatter = {
-//   currency: 'USD',
-//   locale: 'en-US',
-//   format(amount) {
-//     return new Intl.NumberFormat(this.locale, { style:'currency', currency: this.currency }).format(amount)
-//   }
-// }
-// const formatUSD = formatter.format.bind(formatter)
-// const formatEUR = formatter.format.bind({ locale:'de-DE', currency:'EUR' })
-// console.log(formatUSD(1299.99))   // $1,299.99
-// console.log(formatEUR(1299.99))   // 1.299,99 €
-// YOUR CODE:
+//  COUNT RENDERED CARDS ───────────────────
+
+function getCardsLength() {
+  let cards = document.querySelectorAll(".trip-card");
+  cards = Array.from(cards);
+  console.log(`cards length: ${cards.length}`);
+}
+
+getCardsLength();
+
+function generatePrices() {
+  const prices = Array.from({ length: 15 }, (_, index) => {
+    return (index + 1) * 250;
+  });
+  console.log(prices);
+  return prices;
+}
+generatePrices();
+//  BIND — PRICE FORMATTER ──────────────────────────────
+
+const formatter = {
+  currency: "USD",
+  locale: "en-US",
+  format(amount) {
+    return new Intl.NumberFormat(this.locale, {
+      style: "currency",
+      currency: this.currency,
+    }).format(amount);
+  },
+};
+const formatUSD = formatter.format.bind(formatter);
+const formatEUR = formatter.format.bind({ currency: "EUR", locale: "de-DE" });
+
+console.log(formatUSD(1299.99)); // $1,299.99
+console.log(formatEUR(1299.99)); // 1.299,99 €
